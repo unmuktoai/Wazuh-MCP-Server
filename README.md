@@ -23,7 +23,7 @@ A production-grade, open-source MCP server for integrating Wazuh security data w
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/yourusername/Wazuh-MCP-Server.git
+   git clone https://github.com/unmuktoai/Wazuh-MCP-Server.git
    cd Wazuh-MCP-Server
 Create and Activate a Virtual Environment:
 
