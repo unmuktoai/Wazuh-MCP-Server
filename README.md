@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/unmuktoai-wazuh-mcp-server-badge.png)](https://mseep.ai/app/unmuktoai-wazuh-mcp-server)
+
 # Wazuh MCP Server
 
 A production-grade, open-source MCP server for integrating Wazuh security data with LLMs (such as the Claude Desktop App). This service authenticates with the Wazuh RESTful API, retrieves alerts from Elasticsearch indices, transforms events into an MCP-compliant JSON format, and exposes an HTTP endpoint for Claude Desktop to fetch real-time security context.
