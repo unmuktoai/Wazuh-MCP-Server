@@ -212,8 +212,6 @@ pip install -e ".[dev]"
 # Run tests
 pytest
 
-# We're here to help!
-# Join our Discord for questions: https://discord.gg/wazuh-mcp
 ```
 
 **First time contributing to open source?** No problem! We'll help you through the process. Just open an issue saying you'd like to help, and we'll find something perfect for your skill level.
