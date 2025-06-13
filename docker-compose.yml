@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  wazuh-mcp-server:
+    build: .
+    container_name: wazuh-mcp-server
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    networks:
+      - mcp-network
+
+networks:
+  mcp-network:
+    driver: bridge

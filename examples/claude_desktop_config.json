@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "wazuh-mcp": {
+      "command": "python",
+      "args": [
+        "C:\\\\path\\\\to\\\\wazuh-mcp-server\\\\src\\\\wazuh_mcp_server.py"
+      ],
+      "env": {
+        "WAZUH_HOST": "your-wazuh-server",
+        "WAZUH_PORT": "55000",
+        "WAZUH_USER": "admin",
+        "WAZUH_PASS": "your-password",
+        "VERIFY_SSL": "false"
+      }
+    }
+  }
+}
