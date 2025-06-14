@@ -9,7 +9,7 @@
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/unmuktoai/wazuh-mcp-server.git
+git clone https://github.com/gensecaihq/wazuh-mcp-server.git
 cd wazuh-mcp-server
 ```
 
