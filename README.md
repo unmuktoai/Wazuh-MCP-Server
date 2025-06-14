@@ -110,7 +110,7 @@ Ask Claude questions like:
 
 ```bash
 # Clone and enter directory
-git clone https://github.com/unmuktoai/wazuh-mcp-server.git
+git clone https://github.com/gensecaihq/wazuh-mcp-server.git
 cd wazuh-mcp-server
 
 # Run installer
@@ -199,7 +199,7 @@ We welcome contributions from the security community! Whether you're a security 
 
 ```bash
 # Clone your fork
-git clone https://github.com/unmuktoai/wazuh-mcp-server.git
+git clone https://github.com/gensecaihq/wazuh-mcp-server.git
 cd wazuh-mcp-server
 
 # Create virtual environment
@@ -225,8 +225,8 @@ pytest
 
 ## 💬 Community
 
-- [Discussions](https://github.com/unmuktoai/Wazuh-MCP-Server/discussions/)
-- [Issue Tracker](https://github.com/unmuktoai/wazuh-mcp-server/issues)
+- [Discussions](https://github.com/gensecaihq/Wazuh-MCP-Server/discussions/)
+- [Issue Tracker](https://github.com/gensecaihq/wazuh-mcp-server/issues)
 - 
 
 ## 📄 License
