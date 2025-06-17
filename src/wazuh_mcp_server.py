@@ -243,8 +243,11 @@ class WazuhMCPServer:
     def __init__(self):
         self.server = Server("wazuh-mcp")
         self.config = WazuhConfig()
-        self.api_client: Optional[WazuhAPIClient] = None
+        self.api_client: WazuhAPIClient = WazuhAPIClient(self.config)
+        # Revert external_client to its original state as its modification was not requested
         self.external_client: Optional[ExternalAPIClient] = None
+        # Remove instantiation of SecurityAnalyzer as it only contains static methods
+        # self.security_analyzer = SecurityAnalyzer(self.config)
         self._setup_handlers()
     
     def _setup_handlers(self):
@@ -290,9 +293,7 @@ class WazuhMCPServer:
         async def handle_read_resource(uri: str) -> str:
             """Read specific Wazuh resource"""
             try:
-                if not self.api_client:
-                    self.api_client = WazuhAPIClient(self.config)
-                    await self.api_client.__aenter__()
+                # API client is now initialized in __init__ and session managed by run()
                 
                 if uri == "wazuh://alerts/recent":
                     data = await self.api_client.get_alerts(limit=50)
@@ -303,7 +304,7 @@ class WazuhMCPServer:
                     return json.dumps(self._format_agents(data), indent=2)
                 
                 else:
-                    raise ValueError(f"Unknown resource URI: {uri}")
+                    raise ValueError(f"Unknown or unsupported resource URI: {uri}")
                     
             except Exception as e:
                 logger.error(f"Error reading resource {uri}: {str(e)}")
@@ -366,9 +367,7 @@ class WazuhMCPServer:
         async def handle_call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             """Execute Wazuh tools with enhanced capabilities"""
             try:
-                if not self.api_client:
-                    self.api_client = WazuhAPIClient(self.config)
-                    await self.api_client.__aenter__()
+                # API client is now initialized in __init__ and session managed by run()
                 
                 if name == "get_alerts":
                     limit = arguments.get("limit", 100)
@@ -414,6 +413,11 @@ class WazuhMCPServer:
                             return [types.TextContent(
                                 type="text",
                                 text=json.dumps(health, indent=2)
+                            )]
+                        else: # Add this else block for when agent_id is not found
+                            return [types.TextContent(
+                                type="text",
+                                text=json.dumps({"error": f"Agent ID {agent_id} not found."})
                             )]
                     else:
                         health_report = self._assess_all_agents_health(data)
@@ -538,34 +542,51 @@ class WazuhMCPServer:
         return health_report
     
     async def run(self):
-        """Run the MCP server"""
-        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+        """Run the MCP server with robust client lifecycle management."""
+        try:
+            logger.info("Initializing API client session...")
+            await self.api_client.__aenter__() # Open WazuhAPIClient session
+
+            # If external_client were to be used and mandatory for server operation:
+            # logger.info("Initializing External API client session...")
+            # await self.external_client.__aenter__() # Assuming external_client is also non-optional
+
             logger.info("Wazuh MCP Server (Enhanced Edition) starting...")
             logger.info(f"Connecting to Wazuh at {self.config.base_url}")
             
             init_options = InitializationOptions(
                 server_name="wazuh-mcp",
-                server_version="2.0.0",
+                server_version="2.0.0", # Consider updating if features change significantly
                 capabilities=self.server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={}
                 )
             )
             
-            try:
+            # stdio_server itself is an async context manager
+            async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
                 await self.server.run(
                     read_stream,
                     write_stream,
                     init_options
                 )
-            except Exception as e:
-                logger.error(f"Server error: {str(e)}")
-                raise
-            finally:
-                if self.api_client:
-                    await self.api_client.__aexit__(None, None, None)
-                if self.external_client:
-                    await self.external_client.__aexit__(None, None, None)
+
+        except Exception as e:
+            # This will catch errors from __aenter__ calls, stdio_server setup,
+            # or self.server.run()
+            logger.error(f"Server runtime error: {str(e)}")
+            raise # Re-raise to be caught by main() for sys.exit(1)
+        finally:
+            # Ensure resources are cleaned up
+            logger.info("Shutting down. Attempting to close API client session...")
+            # WazuhAPIClient.__aexit__ is safe to call (checks if self.session exists)
+            await self.api_client.__aexit__(None, None, None)
+
+            # If external_client were used:
+            # if self.external_client: # Check if it was initialized
+            #     logger.info("Attempting to close External API client session...")
+            #     await self.external_client.__aexit__(None, None, None)
+            logger.info("Server cleanup finished.")
 
 
 async def main():
